@@ -2,6 +2,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void printvec(double *v, int len){
+ 
+    for(int i=0; i<len;i++){
+     
+        printf("%f  ",v[i]);
+    }
+    printf("\n");
+}
+
+
+void norm(double *v, int len){
+    double n;
+    for(int i=0;i<len;i++){
+     
+        n+=v[i]*v[i];
+    }
+    n=sqrt(n);
+    for(int i=0;i<len;i++){
+     
+        v[i]=v[i]/n;
+    }
+}
+
+double randphi(){
+    int r = rand();
+    double r1 = (double)r/RAND_MAX;
+    return 2*M_PI*r1;
+}
+
+void cross(double *u, double *v, double *w){
+    
+    w[0]=u[1]*v[2]-u[2]*v[1];
+    w[1]=u[2]*v[0]-u[0]*v[2];
+    w[2]=u[0]*v[1]-u[1]*v[0];
+    
+}
+
+double checkorth(double *u, double *v){
+ 
+    if(u[0]*v[0]+u[1]*v[1]+u[2]*v[2] == 0){
+     
+        return 0;
+        
+    }
+    else{
+        return u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
+    }
+    
+}
 
 
 double rayscat(){
