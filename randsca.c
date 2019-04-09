@@ -6,20 +6,19 @@
 
 
 
+//inputs pos,sun angles, tau_c, 
 
+void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, double dz){
 
-int main(){
     
     time_t t;
     srand((unsigned) time(&t));
     
     
-    double pos[3];
+    
     double dir[3];
-    double dz=1000.; //=10km
-    double theta_s = 60*M_PI/180.;
-    double phi_s = 0*M_PI/180.;
-    double tau_c = 10.;
+    double pos[3];
+    
     double bext = tau_c / dz;
     
     int N_up = 0;
@@ -36,15 +35,17 @@ int main(){
     
     while(I < Ntot){
         
-        pos[0]=0.;
-        pos[1]=0.;
-        pos[2]=dz;
+        pos[0]=pos_i[0];
+        pos[1]=pos_i[1];
+        pos[2]=pos_i[2];
         
         dir[0]=sin(theta_s)*cos(phi_s);
         dir[1]=sin(theta_s)*sin(phi_s);
         dir[2]=-cos(theta_s);
         
         while(1==1){    
+            
+            ///////////////////////////Transmission through free mean path//////////////////////////////////////
             
             double tau = taufmp();
             double ds = tau/bext;
@@ -67,6 +68,8 @@ int main(){
 //                 printf("N_up++ at I=%d\n\n",I);
                 break;
             }
+            
+            ///////////////////////////Scattering in cloud layer//////////////////////////////////////////////
             
             N_sca++;
             
@@ -122,32 +125,17 @@ int main(){
                 
             }
             
-            
-            //         for(int k=0; k<3;k++){
-            //             dir_temp[k] = dir[k] + u[k]*tan(acos(mu));
-            //         }
-            //         norm(dir_temp,3);
-            //         
-            //         double phi=randphi();
-            //         
-            //         for(int k=0; k<3;k++){
-            //             dir[k] = dir_temp[k] + tan(phi)*v[k];
-            //         }
-            //         norm(dir,3);
-            //         printvec(dir,3);
-            //         printf("%f\n",dir[0]*dir[0]+dir[1]*dir[1]+dir[2]*dir[2]);
-            //         
-            //         printf("%f  %f  %f\n",checkorth(u,v) ,checkorth(u,dir), checkorth(dir,v));
-            
-            
         }   
+        ///max number of scatterings
         if(N_sca>N_sca_m){
          N_sca_m = N_sca;   
         
           
         }
+        ///avg number of scatterings
         avg += N_sca;
         N_sca = 0;
+        ///photon count
         I++;
     }
     avg = avg/Ntot;
