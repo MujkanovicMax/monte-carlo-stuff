@@ -8,7 +8,7 @@
 
 //inputs pos,sun angles, tau_c, 
 
-void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, double dz){
+void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, double dz, int Ntot, double *pos_f , double *dir_f ){
 
     
     time_t t;
@@ -28,9 +28,10 @@ void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, doubl
     
     
     double w[]={1,0,0};
+    double w_alt[]={0,1,0};
+    
     
     int I = 0;
-    int Ntot = 100000;
     double avg = 0;
     
     while(I < Ntot){
@@ -58,12 +59,15 @@ void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, doubl
             }
             
             
-            if(pos[2] <= 0.){
+            if(pos[2] <= pos_i[2]-dz){
                 N_dn++;
 //                 printf("N_dn++ at I=%d\n\n",I);  
+                
+                
+                
                 break;
             }
-            else if(pos[2] > dz){
+            else if(pos[2] > pos_i[2]){
                 N_up++;
 //                 printf("N_up++ at I=%d\n\n",I);
                 break;
@@ -83,6 +87,9 @@ void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, doubl
             double u[3];
             double v[3];
             cross(dir,w,u);
+            if(u[0] == 0 && u[1] == 0 && u[2] == 0){
+                cross(dir,w_alt,u);
+            }
             norm(u,3);
             cross(dir,u,v);
             
