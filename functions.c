@@ -13,7 +13,7 @@ void printvec(double *v, int len){
 
 
 void norm(double *v, int len){
-    double n;
+    double n=0;
     for(int i=0;i<len;i++){
      
         n+=v[i]*v[i];
@@ -39,19 +39,34 @@ void cross(double *u, double *v, double *w){
     
 }
 
-double checkorth(double *u, double *v){
+int checkorth(double *u, double *v){
  
-    if(u[0]*v[0]+u[1]*v[1]+u[2]*v[2] == 0){
+    if(fabs(u[0]*v[0]+u[1]*v[1]+u[2]*v[2]) <= 1e-6){
      
-        return 0;
+        return 1;
         
     }
     else{
-        return u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
+        printf("Vector are not orthogonal. Scalar Product = %.9f\n", u[0]*v[0]+u[1]*v[1]+u[2]*v[2]);
+        return 0;
     }
     
 }
 
+int checkangle(double *u, double *v, int len,double mu){
+    double sum=0;
+    for(int i = 0;i<len;i++){
+        sum += u[i]*v[i];
+    }
+    if(fabs(sum-mu) <= 1e-6){
+        return 1;
+    }
+    else{
+        printf("Wrong angle. DIFF = %.9f. mu = %f, sum =%f\n", fabs(sum-mu), mu , sum);
+        return 0;
+    }
+    
+}
 
 double rayscat(){
     int r = rand();
@@ -72,7 +87,7 @@ double rayscatHG(){
     int r = rand();
     double r1 = (double)r/RAND_MAX;
     double g2=0.85;
-    return (pow((2*r1/(1-g2*g2)+1/(g2+1)),-2)-g2*g2-1)/(-2*g2);   
+    return (1/(pow((2*g2*r1/(1-g2*g2)+1/(g2+1)),2))-g2*g2-1)/((-2)*g2);   
     
 }
 
