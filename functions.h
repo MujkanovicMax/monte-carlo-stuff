@@ -10,3 +10,4 @@ void norm(double *v, int len);
 int checkangle(double *u, double *v, int len,double mu);
 double givelen(double *v, int len);
 double randnum();
+void scattering_ray(double *pos_i, double *dir_i, double *dir_f);

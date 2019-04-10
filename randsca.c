@@ -7,14 +7,14 @@
 
 
 //inputs pos,sun angles, tau_c, 
-void scattering(double *pos_i, double *dir_i, double *dir_f){
+void scattering_ray(double *pos_i, double *dir_i, double *dir_f){
     
     norm(dir_i,3);
     
     double w[]={1,0,0};
     double w_alt[]={0,1,0};
     
-    double mu   = rayscatHG();
+    double mu   = rayscat();
     double phi  = randphi();
     //             printf("theta=%f    phi=%f \n\n",acos(mu)*180/M_PI,phi*180/M_PI);
     
@@ -48,7 +48,7 @@ void scattering(double *pos_i, double *dir_i, double *dir_f){
     
     for(int k = 0;k<3;k++){
         
-        dir_temp[k] = cos(M_PI/2. - acos(mu))*nphi[k] + sin(M_PI/2. - acos(mu))*dir[k];
+        dir_temp[k] = cos(M_PI/2. - acos(mu))*nphi[k] + sin(M_PI/2. - acos(mu))*dir_i[k];
         
     }
     //         printvec(dir,3);
@@ -64,14 +64,13 @@ void scattering(double *pos_i, double *dir_i, double *dir_f){
         
     }
     else{
-        printf("breaking loop at I = %d\n",I);
-        break;
-        
+        printf("AngleError");
+                
     }
     
 }
 
-}
+
 
 
 void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, double dz, int Ntot, double *pos_f , double *dir_f ){
