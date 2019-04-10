@@ -8,3 +8,5 @@ int checkorth(double *u, double *v);
 void printvec(double *v, int len);
 void norm(double *v, int len);
 int checkangle(double *u, double *v, int len,double mu);
+double givelen(double *v, int len);
+double randnum();

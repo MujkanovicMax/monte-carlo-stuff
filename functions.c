@@ -11,6 +11,25 @@ void printvec(double *v, int len){
     printf("\n");
 }
 
+double randnum(){
+    int r = rand();
+    double r1 = (double)r/RAND_MAX;
+    return r1;
+    
+}
+
+double givelen(double *v, int len){
+    
+    double n=0;
+    
+    for(int i=0;i<len;i++){
+     
+        n+=v[i]*v[i];
+    }
+
+    return sqrt(n);
+    
+}
 
 void norm(double *v, int len){
     double n=0;

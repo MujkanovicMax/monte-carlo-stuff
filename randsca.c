@@ -7,9 +7,75 @@
 
 
 //inputs pos,sun angles, tau_c, 
+void scattering(double *pos_i, double *dir_i, double *dir_f){
+    
+    norm(dir_i,3);
+    
+    double w[]={1,0,0};
+    double w_alt[]={0,1,0};
+    
+    double mu   = rayscatHG();
+    double phi  = randphi();
+    //             printf("theta=%f    phi=%f \n\n",acos(mu)*180/M_PI,phi*180/M_PI);
+    
+    double u[3];
+    double v[3];
+    
+    cross(dir_i,w,u);
+    
+    if(u[0] == 0 && u[1] == 0 && u[2] == 0){
+        cross(dir_i,w_alt,u);
+    }
+    norm(u,3);
+    
+    cross(dir_i,u,v);
+    
+    checkorth(dir_i,u);
+    checkorth(dir_i,v);
+    checkorth(v,u);
+    
+    double dir_temp[3];
+    double nphi[3];
+    
+    
+    
+    for(int k = 0;k<3;k++){
+        
+        nphi[k] = cos(phi)*u[k] + sin(phi)*v[k];
+        
+    }
+    
+    
+    for(int k = 0;k<3;k++){
+        
+        dir_temp[k] = cos(M_PI/2. - acos(mu))*nphi[k] + sin(M_PI/2. - acos(mu))*dir[k];
+        
+    }
+    //         printvec(dir,3);
+    //         printf("dir\n");
+    //         printvec(dir_temp,3);
+    //         printf("dir_temp\n");
+    
+    if(checkangle(dir_i,dir_temp,3,mu)==1){
+        
+        for(int k = 0;k<3;k++){
+            dir_f[k]=dir_temp[k];
+        }
+        
+    }
+    else{
+        printf("breaking loop at I = %d\n",I);
+        break;
+        
+    }
+    
+}
+
+}
+
 
 void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, double dz, int Ntot, double *pos_f , double *dir_f ){
-
+    
     
     time_t t;
     srand((unsigned) time(&t));
@@ -50,7 +116,7 @@ void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, doubl
             
             double tau = taufmp();
             double ds = tau/bext;
-//             printf("tau=%f  ds=%f\n",tau,ds);
+            //             printf("tau=%f  ds=%f\n",tau,ds);
             double norm_dir = sqrt(dir[0]*dir[0] + dir[1]*dir[1] +dir[2]*dir[2]);
             double n = ds/norm_dir;
             
@@ -61,7 +127,7 @@ void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, doubl
             
             if(pos[2] <= pos_i[2]-dz){
                 N_dn++;
-//                 printf("N_dn++ at I=%d\n\n",I);  
+                //                 printf("N_dn++ at I=%d\n\n",I);  
                 
                 
                 
@@ -69,7 +135,7 @@ void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, doubl
             }
             else if(pos[2] > pos_i[2]){
                 N_up++;
-//                 printf("N_up++ at I=%d\n\n",I);
+                //                 printf("N_up++ at I=%d\n\n",I);
                 break;
             }
             
@@ -82,7 +148,7 @@ void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, doubl
             
             double mu = rayscatHG();
             double phi=randphi();
-//             printf("theta=%f    phi=%f \n\n",acos(mu)*180/M_PI,phi*180/M_PI);
+            //             printf("theta=%f    phi=%f \n\n",acos(mu)*180/M_PI,phi*180/M_PI);
             
             double u[3];
             double v[3];
@@ -135,9 +201,9 @@ void mc_1_layer(double *pos_i, double theta_s, double phi_s, double tau_c, doubl
         }   
         ///max number of scatterings
         if(N_sca>N_sca_m){
-         N_sca_m = N_sca;   
-        
-          
+            N_sca_m = N_sca;   
+            
+            
         }
         ///avg number of scatterings
         avg += N_sca;
