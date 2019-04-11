@@ -123,5 +123,5 @@ double sfcrefl(){
     
     int r = rand();
     double r1 = (double)r/RAND_MAX;
-    return asin(r1);
+    return sqrt(r1);
 }

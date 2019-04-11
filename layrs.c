@@ -24,19 +24,6 @@ void checkborder(double *pos, double *dir, double *dr ,  double *border){
     
 }
 
-void hor_boundary(double *pos, double *bounds){
-    
-    for(int k = 0;k<2;k++){
-        if(pos[k]>=bounds[k]-0.0001){
-            pos[k] = 0;   
-        }
-        else if(pos[k]<=0+0.0001){
-            pos[k] = bounds[k];
-        }
-    }
-    
-}
-
 double checklyr(double *pos, double *dir, double dz){
     
     double z_border=0;
@@ -55,64 +42,30 @@ double checklyr(double *pos, double *dir, double dz){
     return z_border;
 }
 
-
-void checkbox(double *pos, double *dir, double *dr, int *lmn){
-    for(int k=0;k<3;k++){
-        lmn[k] = (floor(pos[k]/dr[k]));
-    }
-    
-}
-
-double choosestep(double *pos, double *dir, double *border,int *coo){
+double choosestep(double *pos, double *dir, double *border){
     
     double vstep[3];
     double tmp;
     for(int k=0;k<3;k++){
-        if(dir[k]==0){
-            vstep[k]=100000000000; //pro progaming
-            
+        
+        vstep[k] = (border[k]-pos[k])/dir[k];
+        
+    }
+    
+    for(int k = 0;k<2;k++){
+        
+        if(vstep[k]<vstep[k+1]){
+            tmp = vstep[k];
         }
         else{
-            vstep[k] = (border[k]-pos[k])/dir[k];
-        }
-    }
-    tmp=vstep[0];
-    
-    for(int k = 0;k<3;k++){
-        if(tmp > vstep[k]){
-            tmp = vstep[k];
-            *coo = k;
+            
+            tmp = vstep[k+1];
         }
         
     }
     
     return tmp;
     
-}
-
-int n_betacheck(double *pos, double *z,int nlvl){
-    int tmp;
-    for(int k =0;k<nlvl;k++){
-        if(pos[2]>=z[k]){
-            tmp=k;
-            break;
-        }
-        else if(pos[2]<1){
-            
-            tmp = 49;
-        }
-    }
-    return tmp;
-}
-
-
-int cloud(int *lmn){
-    if(lmn[0]>=50 && lmn[0]<=60 && lmn[1]>=50 && lmn[1]<=60 && lmn[2]>=5 && lmn[2]<=20){
-        return 1;
-    }
-    else{
-        return 0;
-    }
 }
 
 
@@ -131,24 +84,31 @@ int main(){
     
     read_3c_file ("./ksca_kabs/ksca_kabs_lambda350.dat", &z, &k_s, &k_a, &nlvl);
     
-    double x_step=1;
-    double y_step=1;
-    double z_step=1;
-    
-    double x = nlvl*x_step;
-    double y = nlvl*y_step;
     
     int nlyr = nlvl-1;
-    //     double beta_a[nlyr];
+//     double beta_a[nlyr];
     double beta_s[nlyr];
     double beta_ext[nlyr];
     double tau_lyr;
     double w0[nlyr];
     
+    double dz[nlyr];
     
-    double dx=x_step;
-    double dy=y_step;
-    double dz=z_step;
+    
+    for(int i = 0; i<nlyr;i++){
+        
+        dz[i] = z[i]-z[i+1];
+        beta_ext[i] = k_a[i+1] + k_s[i+1];
+        
+    }
+    
+    for(int i = 0; i<nlyr;i++){
+//         beta_a[i] = k_a[i+1];
+        beta_s[i] = k_s[i+1];
+        w0[i]     = beta_s[i]/beta_ext[i];
+    }
+    
+    
     
     
     
@@ -181,27 +141,17 @@ int main(){
     
     int N_sca_up=0;
     int N_abs=0;
-    int N_dn[120][120];
+    int N_dn=0;
     int N_up=0;
-    int Ntot=70000;
+    int Ntot=1000000;
     
-    double pos[dim];
-    double bounds[] = {120,120,120};
+    double pos[]    = {1,10,120};
     double pos_f[dim];
-    //     double dir_f[dim];
+//     double dir_f[dim];
     double dir[dim];
-    double border[dim];
-    double beta_ext_lyr;
-    double beta_s_lyr;
-    double beta_s_c=30;
-    double w0_lyr;
+//     double border;
     
     
-    for(int k=0;k<120;k++){
-        for(int h=0;h<120;h++){
-            N_dn[k][h] = 0;
-        }
-    }
     
     
     
@@ -211,84 +161,48 @@ int main(){
     //     photon loop
     int I=0;
     int N_sca_m=0;
-    int coo=0;
-    int n_beta;
-    
-    
-    
-    
     
     
     while(I<Ntot){
         
         
         
-        
         double tau = taufmp();
-        int lmn[3];
+        int j =0;
         double path [3];
         
         int N_sca=0;
         
-        pos[0]=randnum()*120;
-        pos[1]=randnum()*120;
+        pos[0]=1;
+        pos[1]=10;
         pos[2]=120;
         
-        double theta_s  = 0*M_PI/180.;
-        double phi_s    = 20*M_PI/180.;
+        double theta_s  = 30*M_PI/180.;
+        double phi_s    = 0*M_PI/180.;
         
         dir[0]=sin(theta_s)*cos(phi_s);
         dir[1]=sin(theta_s)*sin(phi_s);
         dir[2]=-cos(theta_s);
         
-        double dr[dim];
-        
-        
-        
-        checkbox(pos,dir,dr,lmn);
-        
-        
-        dr[0]=dx;
-        dr[1]=dy;
-        dr[2]=dz;
-        
         
         while(1==1){
-            n_beta=n_betacheck(pos,z,nlvl);
-            beta_s_lyr=k_s[n_beta];
-            beta_ext_lyr= beta_s_lyr+k_a[n_beta];
+                        
+            double z_border = checklyr(pos,dir,dz[j]);
+            double step = fabs((pos[2]-z_border)/dir[2]);
             
-            
-            if(cloud(lmn)==1){
-                beta_ext_lyr=beta_ext_lyr + beta_s_c;
-                beta_s_lyr=beta_s_lyr + beta_s_c;
-            }
-            
-            w0_lyr=beta_s_lyr/beta_ext_lyr;
-            
-            checkborder(pos,dir,dr,border);
-            double step = choosestep(pos,dir,border,&coo);
-            //             printf("step= %f\n",step);
             for(int k=0;k<3;k++){
                 path[k]=dir[k]*step;
                 pos_f[k] = pos[k] + path[k];
             }
-            //             printvec(pos_f,3);
             double ds = givelen(path,3);
-            for(int q = 0;q<3;q++){
-                
-                //                 printf("%d\n",lmn[q]);
-                
-            }
-            //             printvec(pos,3);
-            //             printvec(pos_f,3);
             
-            tau_lyr = beta_ext_lyr*ds;
+            tau_lyr = beta_ext[j]*ds;
             if(tau_lyr>= tau){
                 double tmp_vec[3];
                 double b = randnum();
                 
-                if(b<w0_lyr){                    
+                if(b<w0[j]){
+                    
                     step = tau/tau_lyr*step;
                     for(int k=0;k<3;k++){
                         path[k]=dir[k]*step;
@@ -296,27 +210,13 @@ int main(){
                     }
                     
                     N_sca++;
-                    if(cloud(lmn)==1){
-                        double c=randnum();
-                        if(c<beta_s_c/beta_s_lyr){
-                            scattering(pos,dir,tmp_vec);
-//                             printf("I=%d  ",I);
-//                             printvec(tmp_vec,3);
-                        }
-                        else{
-                            scattering_ray(pos,dir,tmp_vec);
-                            
-                        }
-                        tau=taufmp();
-                    }
-                    else{
                     scattering_ray(pos,dir,tmp_vec);
                     tau = taufmp();
                     
                     for(int k=0;k<3;k++){
                         dir[k] = tmp_vec[k];
                     }
-                    }
+                    
                 }
                 else{
                     N_abs++;
@@ -327,9 +227,7 @@ int main(){
             }
             
             else{
-                
                 tau=tau-tau_lyr;
-                
                 if(pos_f[2]>=z[0]-0.1){
                     N_up++;
                     
@@ -348,22 +246,25 @@ int main(){
                         dir[2]=cos(theta_sfc);
                     }
                     else{
-                        checkbox(pos,dir,dr,lmn);
-                        N_dn[lmn[0]][lmn[1]]++;
-                        break;
+                        N_dn++;
+                    
+                    
+                    break;
                     }
                 }
-                
-                
                 
                 for(int k =0;k<3;k++){
                     pos[k]=pos_f[k];
                 }
-                //                 printvec(pos,3);
-                hor_boundary(pos,bounds);
-                checkbox(pos,dir,dr,lmn);
                 
+                //         lyr update
                 
+                if (dir[2]<0){
+                    j++;
+                }
+                else{
+                    j--;
+                }
             }            
             if(N_sca>N_sca_m){
                 N_sca_m = N_sca;   
@@ -373,15 +274,5 @@ int main(){
         I++;
         
     }
-    //     printf("N_dn = %d   N_abs = %d N_up = %d  I = %d  N_sca_up = %d\n", N_dn, N_abs, N_up, I, N_sca_up);
-    FILE *f;
-    f = fopen("field.txt","w+");
-    
-    for(int k=0;k<120;k++){
-        fprintf(f,"\n");
-        for(int h=0;h<120;h++){
-            fprintf(f,"%d ", N_dn[k][h]); 
-        }
-    }
-    fclose(f);
+    printf("N_dn = %d   N_abs = %d N_up = %d  I = %d  N_sca_up = %d\n", N_dn, N_abs, N_up, I, N_sca_up);
 }
