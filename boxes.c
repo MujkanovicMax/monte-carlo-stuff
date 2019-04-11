@@ -82,7 +82,7 @@ int main(){
     double *k_a;
     int nlvl;
     
-    read_3c_file ("./ksca_kabs/ksca_kabs_lambda380.dat", &z, &k_s, &k_a, &nlvl);
+    read_3c_file ("./ksca_kabs/ksca_kabs_lambda350.dat", &z, &k_s, &k_a, &nlvl);
     
     
     int nlyr = nlvl-1;
@@ -199,9 +199,9 @@ int main(){
             tau_lyr = beta_ext[j]*ds;
             if(tau_lyr>= tau){
                 double tmp_vec[3];
-                double a = randnum();
+                double b = randnum();
                 
-                if(a<w0[j]){
+                if(b<w0[j]){
                     
                     step = tau/tau_lyr*step;
                     for(int k=0;k<3;k++){
@@ -234,11 +234,23 @@ int main(){
                     break;
                 }
                 else if(pos_f[2]<=0.0001){
+                    double a =randnum();
+                    double A=0.13;
+                    if(a<A){
+                        
+                        double theta_sfc = sfcrefl();
+                        double phi_sfc = randphi();
+                        
+                        dir[0]=sin(theta_sfc)*cos(phi_sfc);
+                        dir[1]=sin(theta_sfc)*sin(phi_sfc);
+                        dir[2]=cos(theta_sfc);
+                    }
+                    else{
+                        N_dn++;
                     
-                    N_dn++;
                     
                     break;
-                    
+                    }
                 }
                 
                 for(int k =0;k<3;k++){
