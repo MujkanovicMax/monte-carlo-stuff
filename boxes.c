@@ -82,11 +82,11 @@ int main(){
     double *k_a;
     int nlvl;
     
-    read_3c_file ("./ksca_kabs/ksca_kabs_lambda300.dat", &z, &k_s, &k_a, &nlvl);
+    read_3c_file ("./ksca_kabs/ksca_kabs_lambda380.dat", &z, &k_s, &k_a, &nlvl);
     
     
     int nlyr = nlvl-1;
-    double beta_a[nlyr];
+//     double beta_a[nlyr];
     double beta_s[nlyr];
     double beta_ext[nlyr];
     double tau_lyr;
@@ -103,7 +103,7 @@ int main(){
     }
     
     for(int i = 0; i<nlyr;i++){
-        beta_a[i] = k_a[i+1];
+//         beta_a[i] = k_a[i+1];
         beta_s[i] = k_s[i+1];
         w0[i]     = beta_s[i]/beta_ext[i];
     }
@@ -139,16 +139,17 @@ int main(){
     
     int dim = 3;
     
+    int N_sca_up=0;
     int N_abs=0;
     int N_dn=0;
     int N_up=0;
-    int Ntot=10;
+    int Ntot=1000000;
     
     double pos[]    = {1,10,120};
     double pos_f[dim];
-    double dir_f[dim];
+//     double dir_f[dim];
     double dir[dim];
-    double border;
+//     double border;
     
     
     
@@ -176,8 +177,8 @@ int main(){
         pos[1]=10;
         pos[2]=120;
         
-        double theta_s  = 15*M_PI/180.;
-        double phi_s    = 15*M_PI/180.;
+        double theta_s  = 30*M_PI/180.;
+        double phi_s    = 0*M_PI/180.;
         
         dir[0]=sin(theta_s)*cos(phi_s);
         dir[1]=sin(theta_s)*sin(phi_s);
@@ -185,42 +186,35 @@ int main(){
         
         
         while(1==1){
-            
-//             printvec(pos,3);
-            
+                        
             double z_border = checklyr(pos,dir,dz[j]);
-            double step = fabs(dz[j]/dir[2]);
-            //         printf("step = %f\n", step);
+            double step = fabs((pos[2]-z_border)/dir[2]);
             
             for(int k=0;k<3;k++){
                 path[k]=dir[k]*step;
                 pos_f[k] = pos[k] + path[k];
             }
-            //         printvec(path,3);
             double ds = givelen(path,3);
-            //         printf("ds=%f\n",ds);
             
             tau_lyr = beta_ext[j]*ds;
-            //         printf("tau_lyr=%f tau=%f\n",tau_lyr,tau);
-            if(tau_lyr > tau){
-                //             printf("hello");
+            if(tau_lyr>= tau){
                 double tmp_vec[3];
                 double a = randnum();
                 
                 if(a<w0[j]){
-                    printf("a = %f  w0 = %f j=%d\n",a,w0[j],j);
-                    N_sca++;
-                    scattering_ray(pos,dir,tmp_vec);
-                    //                 printf("scattering");
                     
-                    
-                    for(int k=0;k<3;k++){
-                        dir[k] = tmp_vec[k];
-                    }            
                     step = tau/tau_lyr*step;
                     for(int k=0;k<3;k++){
                         path[k]=dir[k]*step;
                         pos[k] = pos[k] + path[k];
+                    }
+                    
+                    N_sca++;
+                    scattering_ray(pos,dir,tmp_vec);
+                    tau = taufmp();
+                    
+                    for(int k=0;k<3;k++){
+                        dir[k] = tmp_vec[k];
                     }
                     
                 }
@@ -234,7 +228,7 @@ int main(){
             
             else{
                 tau=tau-tau_lyr;
-                if(pos_f[2]>=z[0]-0.0001){
+                if(pos_f[2]>=z[0]-0.1){
                     N_up++;
                     
                     break;
@@ -252,7 +246,6 @@ int main(){
                 }
                 
                 //         lyr update
-                //             printvec(pos_f,3);
                 
                 if (dir[2]<0){
                     j++;
@@ -260,9 +253,7 @@ int main(){
                 else{
                     j--;
                 }
-                //             printf("j=%d\n",j);
-            }
-            
+            }            
             if(N_sca>N_sca_m){
                 N_sca_m = N_sca;   
             }
@@ -271,5 +262,5 @@ int main(){
         I++;
         
     }
-    printf("N_dn = %d   N_up = %d  I = %d  N_sca_m = %d\n", N_dn, N_up,I, N_sca_m);
+    printf("N_dn = %d   N_abs = %d N_up = %d  I = %d  N_sca_up = %d\n", N_dn, N_abs, N_up, I, N_sca_up);
 }
