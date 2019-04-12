@@ -91,7 +91,10 @@ int main(){
     double beta_ext[nlyr];
     double tau_lyr;
     double w0[nlyr];
-    
+    double tau_c = 10; 
+    double beta_c[nlyr];
+    double w0_lyr;
+
     double dz[nlyr];
     
     
@@ -105,44 +108,30 @@ int main(){
     for(int i = 0; i<nlyr;i++){
 //         beta_a[i] = k_a[i+1];
         beta_s[i] = k_s[i+1];
-        w0[i]     = beta_s[i]/beta_ext[i];
+        
     }
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    //     box def properties
-    //     double tau_def = 1.;
-    //     
-    //     double tau_box[(int)(x_max/dx)][(int)(y_max/dy)][(int)(z_max/dz)];
-    //     for(int i = 0;i<x_max/dx;i++){
-    //         for(int j = 0;j<y_max/dy;j++){
-    //             for(int k = 0;k<z_max/dz;k++){
-    //                 
-    //                 tau_box[i][j][k] = tau_def;
-    //             }
-    //         }
-    //     }
-    //     //      box special props
-    //     
-    //     tau_box[1][1][1] = 100.;
-    //     
-    //      initialization params
-    
-    /////////////////////////////////////////////////
+    for(int j = 0;j<nlyr;j++){
+     
+        if(j>=5 && j<=15){
+        
+            beta_c[j] = beta_s[j] + 20;
+        }
+        else{
+            beta_c[j] = beta_s[j];
+        }
+        w0[j] = beta_c[j]/(beta_c[j]+k_a[j+1]);
+    }
     
     int dim = 3;
     
     int N_sca_up=0;
     int N_abs=0;
+    int N_sca_temp=0;
     int N_dn=0;
     int N_up=0;
+    int N_sca_avg=0;
     int Ntot=1000000;
     
     double pos[]    = {1,10,120};
@@ -151,7 +140,7 @@ int main(){
     double dir[dim];
 //     double border;
     
-    
+        
     
     
     
@@ -161,6 +150,7 @@ int main(){
     //     photon loop
     int I=0;
     int N_sca_m=0;
+    
     
     
     while(I<Ntot){
@@ -196,23 +186,42 @@ int main(){
             }
             double ds = givelen(path,3);
             
+            
+            
             tau_lyr = beta_ext[j]*ds;
             if(tau_lyr>= tau){
                 double tmp_vec[3];
                 double b = randnum();
+                double r = randnum();
                 
                 if(b<w0[j]){
-                    
+                    if(r>(beta_c[j]-beta_s[j])/beta_c[j]){    
                     step = tau/tau_lyr*step;
                     for(int k=0;k<3;k++){
                         path[k]=dir[k]*step;
                         pos[k] = pos[k] + path[k];
                     }
                     
-                    N_sca++;
-                    scattering_ray(pos,dir,tmp_vec);
-                    tau = taufmp();
+                    N_sca++;        
+                    N_sca_temp++;
                     
+                    scattering_ray(pos,dir,tmp_vec);
+                    }
+                    else{
+                    step = tau/tau_lyr*step;
+                    for(int k=0;k<3;k++){
+                        path[k]=dir[k]*step;
+                        pos[k] = pos[k] + path[k];
+                    }
+                    
+                    N_sca++;        
+                    N_sca_temp++;
+                    
+                    scattering(pos,dir,tmp_vec);
+                    }
+                    tau = taufmp();
+                     //     box def properties
+    
                     for(int k=0;k<3;k++){
                         dir[k] = tmp_vec[k];
                     }
@@ -274,5 +283,6 @@ int main(){
         I++;
         
     }
-    printf("N_dn = %d   N_abs = %d N_up = %d  I = %d  N_sca_up = %d\n", N_dn, N_abs, N_up, I, N_sca_up);
+    N_sca_avg = N_sca_temp/Ntot;
+    printf("N_dn = %d   N_abs = %d N_up = %d  I = %d  N_sca_avg = %d    N_sca_max = %d\n", N_dn, N_abs, N_up, I, N_sca_avg,N_sca_m);
 }
