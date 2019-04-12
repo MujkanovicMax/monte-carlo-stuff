@@ -58,7 +58,7 @@ double checklyr(double *pos, double *dir, double dz){
 
 void checkbox(double *pos, double *dir, double *dr, int *lmn){
     for(int k=0;k<3;k++){
-        lmn[k] = (floor(pos[k]/dr[k]));
+        lmn[k] = (int)(floor(pos[k]/dr[k]));
     }
     
 }
@@ -105,16 +105,16 @@ int n_betacheck(double *pos, double *z,int nlvl){
     return tmp;
 }
 
-
-int cloud(int *lmn){
-    if(lmn[0]>=50 && lmn[0]<=60 && lmn[1]>=50 && lmn[1]<=60 && lmn[2]>=5 && lmn[2]<=20){
-        return 1;
-    }
-    else{
-        return 0;
-    }
-}
-
+/*
+ * i *n*t cloud(int *lmn){
+ * if(lmn[0]>=20 && lmn[0]<=60 && lmn[1]>=20 && lmn[1]<=60 && lmn[2]>=5 && lmn[2]<=20){
+ *    return 1;
+ *    }
+ *    else{
+ *        return 0;
+ *        }
+ *        }
+ */
 
 
 int main(){
@@ -183,7 +183,7 @@ int main(){
     int N_abs=0;
     int N_dn[120][120];
     int N_up=0;
-    int Ntot=70000;
+    int Ntot=100000;
     
     double pos[dim];
     double bounds[] = {120,120,120};
@@ -193,7 +193,7 @@ int main(){
     double border[dim];
     double beta_ext_lyr;
     double beta_s_lyr;
-    double beta_s_c=30;
+    double beta_s_c=20;
     double w0_lyr;
     
     
@@ -218,7 +218,6 @@ int main(){
     
     
     
-    
     while(I<Ntot){
         
         
@@ -234,14 +233,15 @@ int main(){
         pos[1]=randnum()*120;
         pos[2]=120;
         
-        double theta_s  = 0*M_PI/180.;
-        double phi_s    = 20*M_PI/180.;
+        double theta_s  = 15*M_PI/180.;
+        double phi_s    = 0*M_PI/180.;
         
         dir[0]=sin(theta_s)*cos(phi_s);
         dir[1]=sin(theta_s)*sin(phi_s);
         dir[2]=-cos(theta_s);
         
         double dr[dim];
+        int T = 0;
         
         
         
@@ -259,7 +259,24 @@ int main(){
             beta_ext_lyr= beta_s_lyr+k_a[n_beta];
             
             
-            if(cloud(lmn)==1){
+            //             if(cloud(lmn)==1){
+            T=0;
+            if(pos[1]>30){
+                if(pos[1]<80){
+                    if(pos[0]>30){
+                        if(pos[0]<80){
+                            if(pos[2]>30){
+                                if(pos[2]<80){
+                                    T=1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if(T==1){        
+                
                 beta_ext_lyr=beta_ext_lyr + beta_s_c;
                 beta_s_lyr=beta_s_lyr + beta_s_c;
             }
@@ -296,12 +313,13 @@ int main(){
                     }
                     
                     N_sca++;
-                    if(cloud(lmn)==1){
+                    //                     if(cloud(lmn)==1){
+                    if(T==1){
                         double c=randnum();
                         if(c<beta_s_c/beta_s_lyr){
                             scattering(pos,dir,tmp_vec);
-//                             printf("I=%d  ",I);
-//                             printvec(tmp_vec,3);
+                            //                             printf("I=%d  ",I);
+                            //                             printvec(tmp_vec,3);
                         }
                         else{
                             scattering_ray(pos,dir,tmp_vec);
@@ -310,12 +328,12 @@ int main(){
                         tau=taufmp();
                     }
                     else{
-                    scattering_ray(pos,dir,tmp_vec);
-                    tau = taufmp();
-                    
-                    for(int k=0;k<3;k++){
-                        dir[k] = tmp_vec[k];
-                    }
+                        scattering_ray(pos,dir,tmp_vec);
+                        tau = taufmp();
+                        
+                        for(int k=0;k<3;k++){
+                            dir[k] = tmp_vec[k];
+                        }
                     }
                 }
                 else{
@@ -371,7 +389,9 @@ int main(){
             
         }
         I++;
-        
+        //         if(I%1000==0){
+        //             printf("I=%d",I);
+        //         }
     }
     //     printf("N_dn = %d   N_abs = %d N_up = %d  I = %d  N_sca_up = %d\n", N_dn, N_abs, N_up, I, N_sca_up);
     FILE *f;
